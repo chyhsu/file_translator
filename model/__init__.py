@@ -72,7 +72,9 @@ Lists: Use itemize for bullet points and enumerate for numbered lists, preservin
 
 Tables: Use longtable environment to allow tables to span multiple pages naturally if they are long. Use tabular or tabularx for shorter tables if appropriate. Replicate column structure and alignment. Use booktabs for professional-looking rules (\toprule, \midrule, \bottomrule).
 
-Basic Formatting: Use \\textbf{...} for bold and \\textit{...} for italics where identified in the input.
+Basic Formatting: Use \textbf{...} for bold and \textit{...} for italics where identified in the input.
+
+Alignment: Use the \justifying command from ragged2e for full justification when needed. Do NOT create or use any 'Justifying' environment and do NOT define custom alignment environments.
 
 Ensure the generated LaTeX code accurately reflects the spatial and hierarchical relationships of the text elements from the original document layout.
 

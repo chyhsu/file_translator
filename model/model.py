@@ -7,7 +7,7 @@ from . import gemini_api_key, system_prompt
 
 
 
-def gemini_prompt(content, img_dir,model="gemini-2.5-pro-exp-03-25"):
+def gemini_prompt(content, img_dir,model="gemini-2.5-pro"):
     client = genai.Client(api_key=gemini_api_key)
 
     # Create a list for content parts

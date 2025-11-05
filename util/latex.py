@@ -23,9 +23,17 @@ def convert_latex_to_pdf(input_tex_file, output_pdf_path):
     output_name = output_pdf_path.stem
     
     try:
-        # Run XeLaTeX command with proper working directory and absolute paths
+        engine_cmd = "pdflatex"
+        tex_src = input_tex_file.read_text(encoding="utf-8", errors="ignore")
+        if ("\\usepackage{fontspec}" in tex_src 
+            or "\\usepackage{xeCJK}" in tex_src 
+            or "\\setmainfont" in tex_src 
+            or "\\setCJKmainfont" in tex_src 
+            or "\\XeTeX" in tex_src):
+            engine_cmd = "xelatex"
+
         result = subprocess.run(
-            ["xelatex", 
+            [engine_cmd, 
                 "-interaction=nonstopmode",
                 f"-output-directory={output_dir_abs}",
                 f"-jobname={output_name}",
@@ -33,17 +41,17 @@ def convert_latex_to_pdf(input_tex_file, output_pdf_path):
             capture_output=True,
             text=True,
             check=True,
-            cwd=os.getcwd()  # Run from current directory
+            cwd=os.getcwd()
         )
         
         print(f"Successfully compiled LaTeX to PDF. Output saved as: {output_pdf_path}")
         return True
     except subprocess.CalledProcessError as e:
         print(f"Error compiling LaTeX: {e}")
-        print(f"XeLaTeX stdout: {e.stdout}")
-        print(f"XeLaTeX stderr: {e.stderr}")
+        print(f"Compiler stdout: {e.stdout}")
+        print(f"Compiler stderr: {e.stderr}")
         return False
     except FileNotFoundError:
-        print("XeLaTeX not found. Please make sure XeLaTeX is installed and in your PATH.")
-        print("You can install it with MacTeX (https://www.tug.org/mactex/) on macOS.")
+        print("LaTeX engine not found. Please ensure pdflatex/xelatex is installed and in your PATH.")
+        print("On Ubuntu/Debian, you can install with: sudo apt-get install -y texlive-latex-base texlive-xetex latexmk texlive-fonts-recommended")
         return False

@@ -5,7 +5,7 @@ import os
 
 if __name__ == "__main__":
     # Input file path
-    file_path = "/Users/jasoncyhsu/Downloads/MDS Program Guide updated2.pdf"
+    file_path = "Review and Sign Your AAA Document(s) for Policy AUT702335066_encrypted_.pdf"
     path = Path(file_path)
     stem = path.stem
     
