@@ -11,7 +11,7 @@ def convert_pdf_to_images(pdf_path, output_dir):
     # Convert PDF to a list of images
     # dpi parameter controls the resolution (e.g., 200 is a good default)
     images = convert_from_path(pdf_path, dpi=200)
-
+    print("Converting PDF to images...")
     # Save each image with a unique name
     for i, image in enumerate(images):
         output_file = os.path.join(output_dir, f"page_{i+1}.png")
@@ -42,6 +42,7 @@ def convert_pdf_to_text(pdf_path, output_dir=None):
     # Open the PDF file
     doc = fitz.open(pdf_path)
     result = []
+    print("Converting PDF to text...")
     
     # Process each page
     for page_num, page in enumerate(doc):

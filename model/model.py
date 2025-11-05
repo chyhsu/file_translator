@@ -8,7 +8,7 @@ from . import gemini_api_key
 
 
 
-def gemini_prompt(content, img_dir,model="gemini-2.5-pro"):
+def gemini_prompt(content, img_dir,language,model="gemini-2.5-pro"):
     client = genai.Client(api_key=gemini_api_key)
 
     # Create a list for content parts
@@ -29,13 +29,15 @@ def gemini_prompt(content, img_dir,model="gemini-2.5-pro"):
             })
     
     # Generate content with the properly formatted prompt
+    print("Generating content from LLM...")
     from google.genai import types
     response = client.models.generate_content(
         model=model,
         contents=contents,
         config=types.GenerateContentConfig(
-                system_instruction= get_prompt()
+                system_instruction= get_prompt(language)
             )
     )
+    print("Content generated from LLM")
     return response.text
 

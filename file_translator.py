@@ -6,6 +6,7 @@ import os
 if __name__ == "__main__":
     # Input file path
     file_path = "Auto+New+ID+Card - 2025-11-03T163558.949.pdf"
+    language = "Traditional Chinese"
     path = Path(file_path)
     stem = path.stem
     
@@ -17,7 +18,7 @@ if __name__ == "__main__":
     
     # Create output file paths - use the existing file name pattern
     latex_file_path = latex_path / f"{stem}.tex"
-    output_pdf_file_path = output_pdf_path / f"{stem}_translated.pdf"
+    output_pdf_file_path = output_pdf_path / f"{stem}_{language}.pdf"
     
     # Create directories
     os.makedirs(img_path, exist_ok=True)
@@ -30,12 +31,14 @@ if __name__ == "__main__":
     prompt = convert_pdf_to_text(file_path, text_path)
 
     # Generate LaTeX from Gemini
-    gemini_result = gemini_prompt(str(prompt), img_path)
+    gemini_result = gemini_prompt(str(prompt), img_path, language)
     latex = get_latex_from_response_text(gemini_result)
     
     # Save LaTeX file
+    print("Saving LaTeX file...")
     with open(latex_file_path, "w", encoding="utf-8") as f:
         f.write(latex)
     
     # Convert LaTeX to PDF
+    print("Converting LaTeX to PDF...")
     convert_latex_to_pdf(latex_file_path, output_pdf_file_path)
