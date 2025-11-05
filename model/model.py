@@ -2,7 +2,8 @@ from google import genai
 
 from util import load_images_from_directory,encode_image_to_base64
 # These variables are imported from __init__.py
-from . import gemini_api_key, system_prompt
+from .prompt import get_prompt
+from . import gemini_api_key
 
 
 
@@ -33,7 +34,7 @@ def gemini_prompt(content, img_dir,model="gemini-2.5-pro"):
         model=model,
         contents=contents,
         config=types.GenerateContentConfig(
-                system_instruction=system_prompt
+                system_instruction= get_prompt()
             )
     )
     return response.text
