@@ -7,21 +7,14 @@ def file_translator(file_path, language):
     path = Path(file_path)
     stem = path.stem
     
-    # Create output directory paths
+    # Compute output paths (directories are created by the GUI worker)
     img_path = Path("img") / stem
     text_path = Path("text") / stem
     latex_path = Path("latex") / stem
     output_pdf_path = Path("translated_pdf") / stem
     
-    # Create output file paths - use the existing file name pattern
     latex_file_path = latex_path / f"{stem}.tex"
     output_pdf_file_path = output_pdf_path / f"{stem}_{language}.pdf"
-    
-    # Create directories
-    os.makedirs(img_path, exist_ok=True)
-    os.makedirs(text_path, exist_ok=True)
-    os.makedirs(latex_path, exist_ok=True)
-    os.makedirs(output_pdf_path, exist_ok=True)
 
     # Process PDF
     convert_pdf_to_images(file_path, img_path)
@@ -40,5 +33,4 @@ def file_translator(file_path, language):
     print("Converting LaTeX to PDF...")
     convert_latex_to_pdf(latex_file_path, output_pdf_file_path)
 
-if __name__ == "__main__":
-    file_translator("QuoteProposalSummary - 2025-11-03T154156.920.pdf", "Traditional Chinese")
+

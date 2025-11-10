@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from contextlib import redirect_stdout, redirect_stderr
 
-from PySide6.QtCore import QThread, Signal
+from PySide6.QtCore import QThread, Signal, QTimer
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QPushButton, QLineEdit,
     QFileDialog, QComboBox, QVBoxLayout, QHBoxLayout, QTextEdit, QMessageBox, QFrame
@@ -26,7 +26,7 @@ class _LogStream:
             if line:
                 self.emit_fn(line)
         return len(s)
-
+ 
     def flush(self):
         if self._buf:
             self.emit_fn(self._buf)
@@ -65,6 +65,12 @@ class TranslateWorker(QThread):
         old_cwd = os.getcwd()
         try:
             os.chdir(repo_root)
+            # Ensure output directories exist for this document
+            stem = Path(self.pdf_path).stem
+            os.makedirs(Path("img") / stem, exist_ok=True)
+            os.makedirs(Path("text") / stem, exist_ok=True)
+            os.makedirs(Path("latex") / stem, exist_ok=True)
+            os.makedirs(Path("translated_pdf") / stem, exist_ok=True)
             log_stream = _LogStream(self.log.emit)
             self.log.emit(f"[info] Starting translator core with language: {lang_name}")
             rc = 0
@@ -89,7 +95,7 @@ class TranslateWorker(QThread):
             self.done.emit(rc)
         finally:
             os.chdir(old_cwd)
-
+            
 
 # ---------- Main Window ----------
 class MainWindow(QMainWindow):
@@ -222,6 +228,9 @@ class MainWindow(QMainWindow):
             )
         # Re-enable run button to allow another try
         self.run_btn.setEnabled(True)
+        
+        # Exit the application cleanly from the GUI thread with the worker's return code
+        # QTimer.singleShot(0, lambda: QApplication.instance().exit(return_code))
 
 
 def run_gui():
