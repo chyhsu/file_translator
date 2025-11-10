@@ -2,6 +2,8 @@ from pdf2image import convert_from_path
 import os
 import base64
 import re
+from pdfminer.high_level import extract_pages
+from pdfminer.layout import LAParams, LTTextBox, LTTextLine
 
 def convert_pdf_to_images(pdf_path, output_dir):
     # Optional: Specify the output directory for images
@@ -31,57 +33,37 @@ def convert_pdf_to_text(pdf_path, output_dir=None):
     Returns:
         list: List of dictionaries containing page number, text blocks with their positions and content
     """
-    try:
-        import fitz  # PyMuPDF
-    except ImportError:
-        raise ImportError("PyMuPDF is required. Install it with: pip install PyMuPDF")
-    
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
     
-    # Open the PDF file
-    doc = fitz.open(pdf_path)
     result = []
     print("Converting PDF to text...")
+    laparams = LAParams(
+        char_margin=2.0,
+        word_margin=0.1,
+        line_margin=0.3,
+        detect_vertical=True,
+    )
     
-    # Process each page
-    for page_num, page in enumerate(doc):
-        # Extract text blocks with their positions
-        blocks = page.get_text("dict")["blocks"]
+    for page_num, layout in enumerate(extract_pages(pdf_path, laparams=laparams), start=1):
         page_data = {
-            "page": page_num + 1,
+            "page": page_num,
             "blocks": []
         }
-        
-        # Process each block (usually paragraphs or text sections)
-        for block in blocks:
-            if block.get("type") == 0:  # Type 0 is text
-                # Get the bounding box (x0, y0, x1, y1)
-                bbox = block.get("bbox")
-                
-                # Process each line in the block
-                for line in block.get("lines", []):
-                    line_bbox = line.get("bbox")
-                    line_text = ""
-                    
-                    # Concatenate all spans in the line
-                    for span in line.get("spans", []):
-                        line_text += span.get("text", "")
-                    
-                    if line_text.strip():  # Only add non-empty lines
+        for element in layout:
+            if isinstance(element, LTTextBox):
+                for line in element:
+                    if isinstance(line, LTTextLine):
+                        text = line.get_text().strip()
+                        if not text:
+                            continue
+                        x0, y0, x1, y1 = line.bbox
                         page_data["blocks"].append({
-                            "text": line_text,
-                            "position": {
-                                "x0": line_bbox[0],
-                                "y0": line_bbox[1],
-                                "x1": line_bbox[2],
-                                "y1": line_bbox[3]
-                            }
+                            "text": text,
+                            "position": {"x0": x0, "y0": y0, "x1": x1, "y1": y1}
                         })
-        
         result.append(page_data)
     
-    # Save to file if output_dir is provided
     if output_dir:
         import json
         output_file = os.path.join(output_dir, "txt.json")

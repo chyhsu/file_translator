@@ -71,6 +71,13 @@ Basic Formatting: Use \textbf{...} for bold and \textit{...} for italics where i
 
 Alignment: Use the \justifying command from ragged2e for full justification when needed. Do NOT create or use any 'Justifying' environment and do NOT define custom alignment environments.
 
+Overflow Handling:
+- Keep all content within \linewidth and \textheight. Do not rely on manual spacing (\\, \vspace, \hspace) to force fit.
+- Prefer structural wrapping first: use AutoTabularx with Y or p{..} columns and \makecell{...} for multi-line cells (AutoTabularx auto-scales table width to \linewidth).
+- Use Y columns (\newcolumntype{Y}{>{\raggedright\arraybackslash}X}) to favor wrapping over overfull boxes.
+- Wrap long URLs with \url{...} (xurl enabled) so they can break safely.
+- LAST RESORT: if a line or cell would overflow, use \fitline{...} (inline), \fitcell{...} (table cell), or wrap paragraphs in a \begin{fitblock} ... \end{fitblock} to automatically scale down to fit.
+
 Ensure the generated LaTeX code accurately reflects the spatial and hierarchical relationships of the text elements from the original document layout.
 
 Syntax Validation: Internally verify that the generated LaTeX code is syntactically correct and should compile without errors using a standard LaTeX distribution (like TeX Live or MiKTeX) equipped with the xeCJK package and specified fonts.
@@ -91,25 +98,49 @@ Content Flow: While replicating structure, use environments like longtable that 
 
 LaTeX Template (Mandatory Structure):
 
-\\documentclass[a4paper]{article}
-\\usepackage{xeCJK}
-\\setCJKmainfont{Noto Serif CJK TC}
-\\usepackage[margin=1in]{geometry} 
-\\usepackage{longtable} 
-\\usepackage{array} 
-\\usepackage{tabularx} 
-\\usepackage{booktabs} 
-\\usepackage{ragged2e} 
-\\usepackage{enumitem} 
-\\usepackage{amsmath} 
-\\usepackage{titlesec} 
-\\pagestyle{empty} 
+\documentclass[a4paper]{article}
+\usepackage{xeCJK}
+\setCJKmainfont{Noto Serif CJK TC}
+\usepackage[margin=1in]{geometry} 
+\usepackage{longtable} 
+\usepackage{array} 
+\usepackage{tabularx} 
+\usepackage{booktabs} 
+\usepackage{microtype}
+\usepackage{xurl}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{environ}
+\usepackage{etoolbox}
+\usepackage{ragged2e} 
+\usepackage{enumitem} 
+\usepackage{amsmath} 
+\usepackage{titlesec} 
+\pagestyle{empty} 
+% Safer defaults to reduce overflow
+\sloppy
+\tolerance=2000
+\hbadness=10000
+\setlength{\emergencystretch}{4em}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.1}
+\sisetup{detect-all}
+% Column helper favoring wrapping
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+% Auto-scaling tabularx environment
+\NewEnviron{AutoTabularx}[1]{\begin{adjustbox}{max width=\linewidth}\begin{tabularx}{\linewidth}{#1}\BODY\end{tabularx}\end{adjustbox}}
+% Fit helpers (last resort): scale down to fit available width
+\newcommand{\fitline}[1]{\adjustbox{max width=\linewidth}{#1}}
+\newcommand{\fitcell}[1]{\adjustbox{max width=\linewidth}{#1}}
+\newenvironment{fitblock}{\begingroup\small\setlength{\emergencystretch}{2em}\sloppy}{\par\endgroup}
 
-\\begin{document}
+\begin{document}
 
 
-\\end{document}
-
+\end{document}
 
 Final Strict Instruction: Adherence to ALL instructions is critical. Pay absolute attention to the output format (only LaTeX code within the specified template boundaries), content filtering (no graphics), and selective translation rules. Any deviation renders the response invalid. Await the structured input representing the PDF content.
 

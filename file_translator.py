@@ -3,10 +3,7 @@ from util import convert_pdf_to_images, convert_pdf_to_text, get_latex_from_resp
 from pathlib import Path
 import os
 
-if __name__ == "__main__":
-    # Input file path
-    file_path = "Auto+New+ID+Card - 2025-11-03T163558.949.pdf"
-    language = "Traditional Chinese"
+def file_translator(file_path, language):
     path = Path(file_path)
     stem = path.stem
     
@@ -42,3 +39,6 @@ if __name__ == "__main__":
     # Convert LaTeX to PDF
     print("Converting LaTeX to PDF...")
     convert_latex_to_pdf(latex_file_path, output_pdf_file_path)
+
+if __name__ == "__main__":
+    file_translator("QuoteProposalSummary - 2025-11-03T154156.920.pdf", "Traditional Chinese")
