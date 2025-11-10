@@ -10,5 +10,4 @@ translated_pdf
 latex
 .DS_Store
 .python-version
-main.py
 uv.lock
