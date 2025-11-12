@@ -4,6 +4,50 @@ import base64
 import re
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import LAParams, LTTextBox, LTTextLine
+from PIL import Image
+from transformers import AutoProcessor, VisionEncoderDecoderModel
+
+def convert_pdf_to_text_with_model(pdf_path, output_dir=None):
+    """
+    Convert a PDF file to text using Nougat model.
+    
+    Args:
+        pdf_path (str): Path to the PDF file
+        output_dir (str, optional): Directory to save the text output. If None, no file is saved.
+        
+    Returns:
+        str: Extracted markdown text from the PDF
+    """
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    print("Converting PDF to text with Nougat model...")
+    model_id = "facebook/nougat-base"
+    processor = AutoProcessor.from_pretrained(model_id)
+    model = VisionEncoderDecoderModel.from_pretrained(model_id).eval()
+
+    pages = convert_from_path(pdf_path, dpi=300)
+
+    texts = []
+    for i, img in enumerate(pages, start=1):
+        print(f"Processing page {i}/{len(pages)}...")
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+        batch = processor(images=img, return_tensors="pt")
+        out_ids = model.generate(**batch, max_new_tokens=4096)
+        text = processor.batch_decode(out_ids, skip_special_tokens=True)[0]
+        texts.append(text)
+
+    full_markdown = "\n\n".join(texts)
+    
+    if output_dir:
+        output_file = os.path.join(output_dir, "nougat_output.md")
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(full_markdown)
+        print(f"Saved markdown to {output_file}")
+    
+    return full_markdown
+
 
 def convert_pdf_to_images(pdf_path, output_dir):
     # Optional: Specify the output directory for images

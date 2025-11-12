@@ -1,7 +1,8 @@
 from model import gemini_prompt
-from util import convert_pdf_to_images, convert_pdf_to_text, get_latex_from_response_text, convert_latex_to_pdf
+from util import convert_pdf_to_images, convert_pdf_to_text_with_model,convert_pdf_to_text, get_latex_from_response_text, convert_latex_to_pdf
 from pathlib import Path
 import os
+
 
 def file_translator(file_path, language):
     path = Path(file_path)
@@ -18,7 +19,7 @@ def file_translator(file_path, language):
 
     # Process PDF
     convert_pdf_to_images(file_path, img_path)
-    prompt = convert_pdf_to_text(file_path, text_path)
+    prompt = convert_pdf_to_text_with_model(file_path, text_path)
 
     # Generate LaTeX from Gemini
     gemini_result = gemini_prompt(str(prompt), img_path, language)
